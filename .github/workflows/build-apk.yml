@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: zulu
           java-version: '17'
@@ -22,21 +22,26 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.0'
           channel: stable
           cache: true
 
-      - name: Create Android project
-        run: flutter create . --platforms=android
+      - name: Create Flutter Android project
+        run: |
+          mkdir /tmp/athkar_app
+          flutter create --platforms=android /tmp/athkar_app
+          cp -r lib /tmp/athkar_app/
+          cp pubspec.yaml /tmp/athkar_app/
 
       - name: Get dependencies
+        working-directory: /tmp/athkar_app
         run: flutter pub get
 
       - name: Build APK
+        working-directory: /tmp/athkar_app
         run: flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Athkar-App-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: /tmp/athkar_app/build/app/outputs/flutter-apk/app-release.apk
